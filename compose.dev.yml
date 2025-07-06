@@ -1,0 +1,154 @@
+services:
+  app-web:
+    image: nginx:latest # Using the default Nginx image with custom configuration.
+    volumes:
+      # Mount the application code for live updates
+      - ./App:/var/www
+      # Mount the Nginx configuration file
+      - ./App/docker/development/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      # Map port 80 inside the container to the port specified by 'NGINX_PORT' on the host machine
+      - "${APP_WEB_PORT:-8500}:80"
+    environment:
+      - NGINX_HOST=localhost
+    networks:
+      - app-laravel-development
+    depends_on:
+      app-php-fpm:
+        condition: service_started  # Wait for php-fpm to start
+
+  app-php-fpm:
+    # For the php-fpm service, we will create a custom image to install the necessary PHP extensions and setup proper permissions.
+    build:
+      context: App
+      dockerfile: ./docker/common/php-fpm/Dockerfile
+      target: development
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+        XDEBUG_ENABLED: ${XDEBUG_ENABLED:-true}
+        XDEBUG_MODE: develop,coverage,debug,profile
+        XDEBUG_HOST: ${XDEBUG_HOST:-host.docker.internal}
+        XDEBUG_IDE_KEY: ${XDEBUG_IDE_KEY:-DOCKER}
+        XDEBUG_LOG: /dev/stdout
+        XDEBUG_LOG_LEVEL: 0
+    env_file:
+      # Load the environment variables from the Laravel application
+      - ./App/.env
+    user: "${UID:-1000}:${GID:-1000}"
+    volumes:
+      # Mount the application code for live updates
+      - ./App:/var/www
+    networks:
+      - app-laravel-development
+      - postgres
+
+  app-workspace:
+    # For the workspace service, we will also create a custom image to install and setup all the necessary stuff.
+    build:
+      context: App
+      dockerfile: ./docker/development/workspace/Dockerfile
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+        XDEBUG_ENABLED: ${XDEBUG_ENABLED:-true}
+        XDEBUG_MODE: develop,coverage,debug,profile
+        XDEBUG_HOST: ${XDEBUG_HOST:-host.docker.internal}
+        XDEBUG_IDE_KEY: ${XDEBUG_IDE_KEY:-DOCKER}
+        XDEBUG_LOG: /dev/stdout
+        XDEBUG_LOG_LEVEL: 0
+    tty: true  # Enables an interactive terminal
+    stdin_open: true  # Keeps standard input open for 'docker exec'
+    env_file:
+      - ./App/.env
+    volumes:
+      - ./App:/var/www
+    networks:
+      - app-laravel-development
+      - postgres
+
+  app-redis:
+    image: redis:alpine
+    networks:
+      - app-laravel-development
+
+  analyzer-web:
+    image: nginx:latest # Using the default Nginx image with custom configuration.
+    volumes:
+      # Mount the application code for live updates
+      - ./Analyzer:/var/www
+      # Mount the Nginx configuration file
+      - ./Analyzer/docker/development/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      # Map port 80 inside the container to the port specified by 'NGINX_PORT' on the host machine
+      - "${ANALYZER_WEB_PORT:-8501}:80"
+    environment:
+      - NGINX_HOST=localhost
+    networks:
+      - analyzer-laravel-development
+    depends_on:
+      analyzer-php-fpm:
+        condition: service_started  # Wait for php-fpm to start
+
+  analyzer-php-fpm:
+    # For the php-fpm service, we will create a custom image to install the necessary PHP extensions and setup proper permissions.
+    build:
+      context: Analyzer
+      dockerfile: ./docker/common/php-fpm/Dockerfile
+      target: development
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+        XDEBUG_ENABLED: ${XDEBUG_ENABLED:-true}
+        XDEBUG_MODE: develop,coverage,debug,profile
+        XDEBUG_HOST: ${XDEBUG_HOST:-host.docker.internal}
+        XDEBUG_IDE_KEY: ${XDEBUG_IDE_KEY:-DOCKER}
+        XDEBUG_LOG: /dev/stdout
+        XDEBUG_LOG_LEVEL: 0
+    env_file:
+      # Load the environment variables from the Laravel application
+      - Analyzer/.env
+    user: "${UID:-1000}:${GID:-1000}"
+    volumes:
+      # Mount the application code for live updates
+      - ./Analyzer/:/var/www
+    networks:
+      - analyzer-laravel-development
+      - postgres
+  analyzer-workspace:
+    # For the workspace service, we will also create a custom image to install and setup all the necessary stuff.
+    build:
+      context: Analyzer
+      dockerfile: ./docker/development/workspace/Dockerfile
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+        XDEBUG_ENABLED: ${XDEBUG_ENABLED:-true}
+        XDEBUG_MODE: develop,coverage,debug,profile
+        XDEBUG_HOST: ${XDEBUG_HOST:-host.docker.internal}
+        XDEBUG_IDE_KEY: ${XDEBUG_IDE_KEY:-DOCKER}
+        XDEBUG_LOG: /dev/stdout
+        XDEBUG_LOG_LEVEL: 0
+    tty: true  # Enables an interactive terminal
+    stdin_open: true  # Keeps standard input open for 'docker exec'
+    env_file:
+      - ./Analyzer/.env
+    volumes:
+      - ./Analyzer:/var/www
+    networks:
+      - analyzer-laravel-development
+      - postgres
+
+  analyzer-redis:
+    image: redis:alpine
+    networks:
+      - analyzer-laravel-development
+
+
+
+
+networks:
+  postgres:
+    external: true
+  app-laravel-development:
+  analyzer-laravel-development:
