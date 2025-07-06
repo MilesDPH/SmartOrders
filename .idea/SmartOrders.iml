@@ -9,6 +9,7 @@
       <sourceFolder url="file://$MODULE_DIR$/App/app" isTestSource="false" packagePrefix="App\" />
       <sourceFolder url="file://$MODULE_DIR$/App/database/factories" isTestSource="false" packagePrefix="Database\Factories\" />
       <sourceFolder url="file://$MODULE_DIR$/App/database/seeders" isTestSource="false" packagePrefix="Database\Seeders\" />
+      <sourceFolder url="file://$MODULE_DIR$/App/tests" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/App/tests" isTestSource="true" packagePrefix="Tests\" />
       <excludeFolder url="file://$MODULE_DIR$/Analyzer/vendor/brick/math" />
       <excludeFolder url="file://$MODULE_DIR$/Analyzer/vendor/carbonphp/carbon-doctrine-types" />
@@ -143,6 +144,7 @@
       <excludeFolder url="file://$MODULE_DIR$/App/vendor/laravel/pint" />
       <excludeFolder url="file://$MODULE_DIR$/App/vendor/laravel/prompts" />
       <excludeFolder url="file://$MODULE_DIR$/App/vendor/laravel/sail" />
+      <excludeFolder url="file://$MODULE_DIR$/App/vendor/laravel/sanctum" />
       <excludeFolder url="file://$MODULE_DIR$/App/vendor/laravel/serializable-closure" />
       <excludeFolder url="file://$MODULE_DIR$/App/vendor/laravel/tinker" />
       <excludeFolder url="file://$MODULE_DIR$/App/vendor/league/commonmark" />
